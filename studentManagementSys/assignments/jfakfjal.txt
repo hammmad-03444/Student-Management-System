@@ -1,0 +1,1214 @@
+
+<!-- 
+    <!-- Resume display area -->
+    <div id="finalresume" style="display: none;"></div>
+
+    <!-- Buttons for actions -->
+     <div class="button-container">
+    <button class="print" style="display: none;">Print Resume</button>
+    <button class="edit" style="display: none;">Edit Resume</button>
+    <button class="download" style="display: none;"></button>
+    <div  class="share" style="display: none;"></div>
+</div> -->
+
+
+
+
+/* Basic styling for the resume */
+#finalresume {
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px solid rgb(155, 132, 207);
+    border-radius: 8px;
+    max-width: 80%;
+    height: 100%;
+    box-shadow: 0 0 10px rgb(37, 37, 37);
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    background-color: rgb(194, 246, 248);
+    
+}
+
+/* Styling for buttons */
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.button-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+button.print {
+    background-color: #008CBA;
+    color: white;
+}
+
+button.edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+button.print:hover {
+    background-color: #007bb5;
+}
+
+button.edit:hover {
+    background-color: #e67e22;
+}
+button.download{
+    background-color: aqua;
+    color: white;
+    text-decoration: none;
+}
+button.download:hover{
+background-color: rgb(3, 117, 117);
+}
+
+
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Hide specific elements during printing */
+    .print, .edit, .button {
+        display: none !important;
+    }
+    
+    /* Ensure the resume content is visible and fits the page */
+    #finalresume {
+        max-width: 100%;
+        overflow: visible;
+        display: block !important;
+    }
+}
+
+
+
+
+document.addEventListener('DOMContentLoaded', () =>{
+  
+    // Get the form, resume elements, and buttons
+    const form = document.getElementById('resume-form') as HTMLFormElement;
+    const resume = document.getElementById('finalresume') as HTMLDivElement;
+    const generateResumeBtn = document.querySelector('.button') as HTMLButtonElement;
+    const printButton = document.querySelector('.print') as HTMLButtonElement;
+    const editButton = document.querySelector('.edit') as HTMLButtonElement;
+    const downloadButton = document.querySelector('.download') as HTMLButtonElement;
+    const usernameElement = document.getElementById('username') as HTMLInputElement;
+    const shareButton = document.querySelector('.share') as HTMLButtonElement;
+    
+    // Define the resume data interface and initial state
+    interface ResumeData {
+        name: string;
+        username: string;
+        email: string;
+        phone: string;
+        objective: string;
+        education: string;
+        workExperience: string;
+        skills: string[];
+    }
+    
+    const resumeData: ResumeData = {
+        name: '',
+        username:'',
+        email: '',
+        phone: '',
+        objective: '',
+        education: '',
+        workExperience: '',
+        skills: [],
+    };
+    
+    // Function to validate form data
+    function validateFormData(data: ResumeData): boolean {
+        if (!data.name || !data.username || !data.email || !data.phone || !data.objective || !data.education || !data.workExperience || !data.skills.length) {
+            alert('Please fill in all the fields');
+            return false;
+        }
+        if (!data.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+            alert('Please enter a valid email');
+            return false;
+        }
+        if (!data.phone.match(/^(\+92|03)\d{9}$/)) {
+            alert('Please enter a valid phone number');
+            return false;
+        }
+        return true;
+    }
+    
+    // Function to generate resume HTML
+    function generateResume() {
+        if (!validateFormData(resumeData)) return;
+    
+        const skillsList = resumeData.skills.map(skill => `<li>${skill}</li>`).join('');
+        const resumeHTML = `
+            <h1>${resumeData.name}</h1>
+            <p>${resumeData.email} <b>|</b> ${resumeData.phone}</p>
+            <h2>Objective</h2>
+            <p>${resumeData.objective}</p>
+            <h2>Education</h2>
+            <p>${resumeData.education}</p>
+            <h2>Work Experience</h2>
+            <p>${resumeData.workExperience}</p>
+            <h2>Skills</h2>
+            <ul>${skillsList}</ul>
+        `;
+
+    
+        resume.innerHTML = resumeHTML;
+        resume.style.display = 'block';
+        form.style.display = 'none';
+        printButton.style.display = 'block';
+        editButton.style.display = 'block';
+        downloadButton.innerHTML = '';
+        shareButton.innerHTML = '';
+        
+         // Create a downloadable link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(resumeHTML);
+    downloadLink.download = `${resumeData.username}_resume.html`;
+    downloadLink.textContent = 'Download Resume';
+    downloadButton.appendChild(downloadLink);
+    downloadButton.style.display = 'block';
+
+    //
+    const shareLinkButton=document.createElement("button")
+    shareLinkButton.textContent="Copy Share Link"
+    shareLinkButton.style.display="block"
+    shareLinkButton.addEventListener("mouseover", () => {
+    shareLinkButton.style.backgroundColor = "darkgray"; // Change background color on hover
+      });
+      
+      shareLinkButton.addEventListener("mouseout", () => {
+        shareLinkButton.style.backgroundColor = "gray"; // Reset background color when not hovering
+      });
+    shareLinkButton.addEventListener("click",async()=>{
+        try{
+        // Generate shareable link
+        const shareableLink=`https://yourdomain.com/resumes/${resumeData.name.replace(/\s+/g, "_")}_resume.html`;
+
+        await navigator.clipboard.writeText(shareableLink)
+        alert("Shareable link copied to clipboard")
+    } catch(err){
+        console.error("Error copying shareable link",err)
+        alert("Failed to copy shareable link")
+    }
+    })
+    shareButton.appendChild(shareLinkButton)
+    shareButton.style.display="block"
+    shareLinkButton.style.color="white";
+    shareLinkButton.style.backgroundColor="gray";
+
+    
+    }
+    
+    // Function to handle the "Edit" button click
+    function handleEdit() {
+        resume.style.display = 'none';
+        form.style.display = 'block';
+        printButton.style.display = 'none';
+        editButton.style.display = 'none';
+        downloadButton.style.display = 'none';
+        shareButton.style.display = 'none';
+    }
+    
+    // Event listener for form submission
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        
+        // Get the form data
+        const formData = new FormData(form);
+        formData.forEach((value, key) => {
+            if (key === 'skills') {
+                resumeData[key] = value.toString().split(',').filter(skill => skill.trim() !== '');
+            } else {
+                resumeData[key] = value.toString();
+            }
+        });
+        const username = usernameElement.value;
+    const uniquePath = `resume/${username.replace(/\s+/g, '_')}_resume.html`;
+        
+        generateResume();
+    });
+    
+    
+    // Event listener for print button
+    printButton?.addEventListener('click', () => {
+        // Ensure resume is visible before printing
+        resume.style.display = 'block';
+        form.style.display = 'none';
+        printButton.style.display = 'none';
+        editButton.style.display = 'none';
+        downloadButton.style.display = 'none';
+        shareButton.style.display = 'none';
+        
+    
+        // Delay to ensure content is rendered
+        setTimeout(() => {
+            window.print();
+            
+            // Reset display properties after printing
+            resume.style.display = 'block';
+            form.style.display = 'none';
+            printButton.style.display = 'block';
+            editButton.style.display = 'block';
+            downloadButton.style.display = 'block';
+            shareButton.style.display = 'block';
+            
+        }, 500);
+    });
+    
+    
+    // // Event listener for edit button
+    editButton?.addEventListener('click', handleEdit);
+
+    
+    
+    
+    
+    // Print-specific CSS class to hide certain elements
+    const style = document.createElement('style');
+    style.textContent = `
+        @media print {
+            .printing, .printing * {
+                display: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    } )
+
+
+    
+.main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+}
+/* Basic styling for the form */
+#resume-form {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 600px;
+}
+
+#resume-form div {
+    margin-bottom: 15px;
+}
+
+#resume-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#resume-form input, #resume-form textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+#resume-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#resume-form button:hover {
+    background-color: #45a049;
+}
+
+/* Basic styling for the resume */
+#finalresume {
+    margin: 20px auto;
+    padding: 20px;
+    border: 2px solid rgb(155, 132, 207);
+    border-radius: 8px;
+    max-width: 80%;
+    background-color: rgb(194, 246, 248);
+    box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+}
+
+/* Left column styling for sections like Contact, Skills, etc. */
+.left-column {
+    flex: 1;
+    background-color: #f5f5f5;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+/* Right column styling for Profile, Education, Experience, etc. */
+.right-column {
+    flex: 2;
+    padding: 20px;
+    background-color: #ffffff;
+    border-radius: 8px;
+}
+
+/* Headings and Text Styling */
+h1, h2 {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+h1 {
+    font-size: 2rem;
+    color: #333;
+}
+
+h2 {
+    font-size: 1.5rem;
+    color: rgb(83, 89, 112);
+    border-bottom: 2px solid rgb(155, 132, 207);
+    padding-bottom: 5px;
+}
+
+p, ul {
+    color: #666;
+    line-height: 1.6;
+    margin-bottom: 10px;
+}
+
+ul li {
+    list-style-type: circle;
+    margin-left: 20px;
+}
+
+/* Styling for buttons */
+button {
+    margin: 10px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.button-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+button.print {
+    background-color: #008CBA;
+    color: white;
+}
+
+button.edit {
+    background-color: #f39c12;
+    color: white;
+}
+
+button.download {
+    background-color: #1abc9c;
+    color: white;
+}
+
+button.print:hover {
+    background-color: #007bb5;
+}
+
+button.edit:hover {
+    background-color: #e67e22;
+}
+
+button.download:hover {
+    background-color: #16a085;
+}
+
+/* Responsive layout adjustments */
+@media (max-width: 768px) {
+    #finalresume {
+        flex-direction: column;
+        padding: 10px;
+        max-width: 95%;
+    }
+
+    .left-column, .right-column {
+        padding: 15px;
+    }
+
+    h1 {
+        font-size: 1.8rem;
+    }
+
+    h2 {
+        font-size: 1.3rem;
+    }
+
+    button {
+        padding: 8px 16px;
+        font-size: 0.8rem;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        margin: 0;
+        padding: 0;
+    }
+    
+    /* Hide specific elements during printing */
+    .print, .edit, .download, .button-container {
+        display: none !important;
+    }
+    
+    /* Ensure the resume content is visible and fits the page */
+    #finalresume {
+        max-width: 100%;
+        overflow: visible;
+        display: block !important;
+    }
+}
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M4 Editable Resume Builder</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="main">
+    
+    <!-- Form for entering resume data -->
+    <form id="resume-form">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="username">User Name for system generated URL:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+        <div>
+            <label for="objective">Objective:</label>
+            <textarea id="objective" name="objective" required></textarea>
+        </div>
+        <div>
+            <label for="education">Education:</label>
+            <textarea id="education" name="education" required></textarea>
+        </div>
+        <div>
+            <label for="workExperience">Work Experience:</label>
+            <textarea id="workExperience" name="workExperience" required></textarea>
+        </div>
+        <div>
+            <label for="skills">Skills (comma separated):</label>
+            <input type="text" id="skills" name="skills" required>
+        </div>
+        <button type="submit" class="button">Generate Resume</button>
+    </form>
+
+
+    
+<!-- Resume display area -->
+<div id="finalresume" style="display: none;">
+    <!-- This section will dynamically populate with the user's resume data -->
+</div>
+
+<!-- Buttons for actions -->
+<div class="button-container">
+    <button class="print" style="display: none;">Print Resume</button>
+    <button class="edit" style="display: none;">Edit Resume</button>
+    <button class="download" style="display: none;">Download Resume</button>
+    <div class="share" style="display: none;"></div>
+</div>
+
+    <script src="app.js"></script>
+</div>
+</body>
+</html> 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M4 Editable Resume Builder</title>
+    <link rel="stylesheet" href="app.css">
+</head>
+<body>
+    <div class="main">
+    
+    <!-- Form for entering resume data -->
+    <form id="resume-form">
+        <div>
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+        </div>
+        <div>
+            <label for="username">User Name for system generated URL:</label>
+            <input type="text" id="username" name="username" required>
+        </div>
+        <div>
+            <label for="email">Email:</label>
+            <input type="email" id="email" name="email" required>
+        </div>
+        <div>
+            <label for="phone">Phone:</label>
+            <input type="tel" id="phone" name="phone" required>
+        </div>
+        <div>
+            <label for="objective">Objective:</label>
+            <textarea id="objective" name="objective" required></textarea>
+        </div>
+        <div>
+            <label for="education">Education:</label>
+            <textarea id="education" name="education" required></textarea>
+        </div>
+        <div>
+            <label for="workExperience">Work Experience:</label>
+            <textarea id="workExperience" name="workExperience" required></textarea>
+        </div>
+        <div>
+            <label for="skills">Skills (comma separated):</label>
+            <input type="text" id="skills" name="skills" required>
+        </div>
+        <button type="submit" class="button">Generate Resume</button>
+    </form>
+
+
+
+<!-- Resume display area -->
+<div id="finalresume" style="display: block;">
+    <div class="resume-container ">
+        <!-- Left Sidebar Section -->
+        <div class="left-column">
+            <div class="section">
+                <h2>Contact</h2>
+                <p><strong>Phone:</strong> +92-41233327</p>
+                <p><strong>Email:</strong> khanwasif456@gmail.com</p>
+                <p><strong>Address:</strong> Block 4, House #33, Karachi, Sindh, Pakistan</p>
+            </div>
+
+            <div class="section">
+                <h2>Expertise</h2>
+                <ul>
+                    <li>HTML</li>
+                    <li>CSS</li>
+                    <li>JavaScript</li>
+                    <li>TypeScript</li>
+                    <li>Node.js</li>
+                </ul>
+            </div>
+
+            <div class="section">
+                <h2>Hobbies</h2>
+                <p>Reading Books, Coding, Traveling, Cooking</p>
+            </div>
+
+            <div class="section">
+                <h2>Languages</h2>
+                <p>English, Urdu</p>
+            </div>
+        </div>
+
+        <!-- Right Main Section -->
+        <div class="right-column">
+            <div class="section">
+                <h1>Profile</h1>
+                <p>Passionate web developer skilled in front-end technologies like HTML, CSS, JavaScript, and TypeScript. Experienced in building responsive and dynamic websites, with a focus on user experience and clean, maintainable code.</p>
+            </div>
+
+            <div class="section">
+                <h2>Education</h2>
+                <p><strong>2018 - 2020</strong> - F.Sc<br>From Board of Intermediate Education Karachi</p>
+                <p><strong>2015 - 2018</strong> - Matriculation in Science<br>From Board of Secondary Education Karachi</p>
+            </div>
+
+            <div class="section">
+                <h2>Experience</h2>
+                <p>No work experience added yet.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Buttons for actions -->
+<div class="button-container">
+    <button class="print">Print Resume</button>
+    <button class="edit">Edit Resume</button>
+    <button class="download">Download Resume</button>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>M4 Editable Resume Builder</title>
+    <link rel="stylesheet" href="app.css">
+    <style>
+        /* Your existing CSS can go here */
+    </style>
+</head>
+<body>
+    <div class="main">
+        <!-- Form for entering resume data -->
+        <form id="resume-form">
+            <div>
+                <label for="name">Name:</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div>
+                <label for="username">User Name for system generated URL:</label>
+                <input type="text" id="username" name="username" required>
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" required>
+            </div>
+            <div>
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" required>
+            </div>
+            <div>
+                <label for="objective">Objective:</label>
+                <textarea id="objective" name="objective" required></textarea>
+            </div>
+            <div>
+                <label for="education">Education:</label>
+                <textarea id="education" name="education" required></textarea>
+            </div>
+            <div>
+                <label for="workExperience">Work Experience:</label>
+                <textarea id="workExperience" name="workExperience" required></textarea>
+            </div>
+            <div>
+                <label for="skills">Skills (comma separated):</label>
+                <input type="text" id="skills" name="skills" required>
+            </div>
+            <button type="submit" class="button">Generate Resume</button>
+        </form>
+
+        <!-- Resume display area -->
+        <div id="finalresume" style="display: none;">
+            <div class="resume-container">
+                <!-- Left Sidebar Section -->
+                <div class="left-column">
+                    <div class="section">
+                        <h2>Contact</h2>
+                        <p><strong>Phone:</strong> <span id="display-phone"></span></p>
+                        <p><strong>Email:</strong> <span id="display-email"></span></p>
+                        <p><strong>Address:</strong> Block 4, House #33, Karachi, Sindh, Pakistan</p>
+                    </div>
+
+                    <div class="section">
+                        <h2>Expertise</h2>
+                        <ul id="display-skills"></ul>
+                    </div>
+
+                    <div class="section">
+                        <h2>Hobbies</h2>
+                        <p>Reading Books, Coding, Traveling, Cooking</p>
+                    </div>
+
+                    <div class="section">
+                        <h2>Languages</h2>
+                        <p>English, Urdu</p>
+                    </div>
+                </div>
+
+                <!-- Right Main Section -->
+                <div class="right-column">
+                    <div class="section">
+                        <h1>Profile</h1>
+                        <p id="display-objective"></p>
+                    </div>
+
+                    <div class="section">
+                        <h2>Education</h2>
+                        <p id="display-education"></p>
+                    </div>
+
+                    <div class="section">
+                        <h2>Experience</h2>
+                        <p id="display-experience"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Buttons for actions -->
+        <div class="button-container" id="action-buttons" style="display: none;">
+            <button class="print">Print Resume</button>
+            <button class="edit">Edit Resume</button>
+            <button class="download">Download Resume</button>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript to handle form submission and populate resume
+        document.getElementById('resume-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent form from submitting traditionally
+
+            // Get values from the form
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const phone = document.getElementById('phone').value;
+            const objective = document.getElementById('objective').value;
+            const education = document.getElementById('education').value.replace(/\n/g, '<br>');
+            const workExperience = document.getElementById('workExperience').value.replace(/\n/g, '<br>');
+            const skills = document.getElementById('skills').value.split(',');
+
+            // Populate the resume with form data
+            document.getElementById('display-phone').textContent = phone;
+            document.getElementById('display-email').textContent = email;
+            document.getElementById('display-objective').textContent = objective;
+            document.getElementById('display-education').innerHTML = education;
+            document.getElementById('display-experience').innerHTML = workExperience;
+
+            // Populate skills
+            const skillsList = document.getElementById('display-skills');
+            skillsList.innerHTML = ''; // Clear any existing skills
+            skills.forEach(skill => {
+                const li = document.createElement('li');
+                li.textContent = skill.trim();
+                skillsList.appendChild(li);
+            });
+
+            // Hide the form and show the resume
+            document.getElementById('resume-form').style.display = 'none';
+            document.getElementById('finalresume').style.display = 'block';
+            document.getElementById('action-buttons').style.display = 'flex';
+        });
+    </script>
+</body>
+</html>
+
+
+css
+    
+.main{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-items: center;
+}
+/* Basic styling for the form */
+#resume-form {
+    margin: 20px;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    max-width: 600px;
+}
+
+#resume-form div {
+    margin-bottom: 15px;
+}
+
+#resume-form label {
+    display: block;
+    margin-bottom: 5px;
+}
+
+#resume-form input, #resume-form textarea {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+#resume-form button {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+#resume-form button:hover {
+    background-color: #45a049;
+}
+
+
+
+
+
+
+/* Container styling */
+.resume-container {
+    display: flex;
+    max-width: 90%;
+    margin: auto;
+    background-color: #f7f7f7;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+}
+
+/* Left column (sidebar) styling */
+.left-column {
+    flex: 1;
+    background-color: #1b3a57;
+    color: #ffffff;
+    padding: 20px;
+}
+
+.left-column h2 {
+    color: #f1c40f;
+    margin-bottom: 10px;
+}
+
+.left-column p, .left-column ul li {
+    color: #dcdcdc;
+    margin-bottom: 8px;
+}
+
+.left-column ul {
+    padding-left: 20px;
+}
+
+.left-column ul li {
+    list-style: disc;
+}
+
+/* Right column (main content) styling */
+.right-column {
+    flex: 2;
+    background-color: #ffffff;
+    padding: 20px;
+}
+
+.right-column h1, .right-column h2 {
+    color: #2c3e50;
+    border-bottom: 2px solid #f1c40f;
+    padding-bottom: 5px;
+    margin-bottom: 15px;
+}
+
+.right-column p {
+    color: #333333;
+    line-height: 1.6;
+    margin-bottom: 15px;
+}
+
+/* Section Styling */
+.section {
+    margin-bottom: 20px;
+}
+
+/* Button Styling */
+.button-container {
+    text-align: center;
+    margin-top: 20px;
+}
+
+button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 5px;
+}
+
+button.print {
+    background-color: #3498db;
+    color: #ffffff;
+}
+
+button.edit {
+    background-color: #e67e22;
+    color: #ffffff;
+}
+
+button.download {
+    background-color: #1abc9c;
+    color: #ffffff;
+}
+
+button:hover {
+    opacity: 0.9;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .resume-container {
+        flex-direction: column;
+    }
+
+    .left-column, .right-column {
+        padding: 15px;
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        margin: 0;
+    }
+
+    .button-container, .edit, .download {
+        display: none;
+    }
+
+    #finalresume {
+        max-width: 100%;
+    }
+}
+
+
+TypeScript
+
+document.addEventListener('DOMContentLoaded', () =>{
+  
+    // Get the form, resume elements, and buttons
+    const form = document.getElementById('resume-form') as HTMLFormElement;
+    const resume = document.getElementById('finalresume') as HTMLDivElement;
+    const generateResumeBtn = document.querySelector('.button') as HTMLButtonElement;
+    const printButton = document.querySelector('.print') as HTMLButtonElement;
+    const editButton = document.querySelector('.edit') as HTMLButtonElement;
+    const downloadButton = document.querySelector('.download') as HTMLButtonElement;
+    const usernameElement = document.getElementById('username') as HTMLInputElement;
+    const shareButton = document.querySelector('.share') as HTMLButtonElement;
+    
+    // Define the resume data interface and initial state
+    interface ResumeData {
+        name: string;
+        username: string;
+        email: string;
+        phone: string;
+        objective: string;
+        education: string;
+        workExperience: string;
+        skills: string[];
+    }
+    
+    const resumeData: ResumeData = {
+        name: '',
+        username:'',
+        email: '',
+        phone: '',
+        objective: '',
+        education: '',
+        workExperience: '',
+        skills: [],
+    };
+    
+    // Function to validate form data
+    function validateFormData(data: ResumeData): boolean {
+        if (!data.name || !data.username || !data.email || !data.phone || !data.objective || !data.education || !data.workExperience || !data.skills.length) {
+            alert('Please fill in all the fields');
+            return false;
+        }
+        if (!data.email.match(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/)) {
+            alert('Please enter a valid email');
+            return false;
+        }
+        if (!data.phone.match(/^(\+92|03)\d{9}$/)) {
+            alert('Please enter a valid phone number');
+            return false;
+        }
+        return true;
+    }
+    
+    // Function to generate resume HTML
+    function generateResume() {
+        if (!validateFormData(resumeData)) return;
+    
+        const skillsList = resumeData.skills.map(skill => `<li>${skill}</li>`).join('');
+        const resumeHTML = `
+            <h1>${resumeData.name}</h1>
+            <p>${resumeData.email} <b>|</b> ${resumeData.phone}</p>
+            <h2>Objective</h2>
+            <p>${resumeData.objective}</p>
+            <h2>Education</h2>
+            <p>${resumeData.education}</p>
+            <h2>Work Experience</h2>
+            <p>${resumeData.workExperience}</p>
+            <h2>Skills</h2>
+            <ul>${skillsList}</ul>
+        `;
+
+    
+        resume.innerHTML = resumeHTML;
+        resume.style.display = 'block';
+        form.style.display = 'none';
+        printButton.style.display = 'block';
+        editButton.style.display = 'block';
+        downloadButton.innerHTML = '';
+        shareButton.innerHTML = '';
+        
+         // Create a downloadable link
+    const downloadLink = document.createElement('a');
+    downloadLink.href = 'data:text/html;charset=utf-8,' + encodeURIComponent(resumeHTML);
+    downloadLink.download = `${resumeData.username}_resume.html`;
+    downloadLink.textContent = 'Download Resume';
+    downloadButton.appendChild(downloadLink);
+    downloadButton.style.display = 'block';
+
+    //
+    const shareLinkButton=document.createElement("button")
+    shareLinkButton.textContent="Copy Share Link"
+    shareLinkButton.style.display="block"
+    shareLinkButton.addEventListener("mouseover", () => {
+    shareLinkButton.style.backgroundColor = "darkgray"; // Change background color on hover
+      });
+      
+      shareLinkButton.addEventListener("mouseout", () => {
+        shareLinkButton.style.backgroundColor = "gray"; // Reset background color when not hovering
+      });
+    shareLinkButton.addEventListener("click",async()=>{
+        try{
+        // Generate shareable link
+        const shareableLink=`https://yourdomain.com/resumes/${resumeData.name.replace(/\s+/g, "_")}_resume.html`;
+
+        await navigator.clipboard.writeText(shareableLink)
+        alert("Shareable link copied to clipboard")
+    } catch(err){
+        console.error("Error copying shareable link",err)
+        alert("Failed to copy shareable link")
+    }
+    })
+    shareButton.appendChild(shareLinkButton)
+    shareButton.style.display="block"
+    shareLinkButton.style.color="white";
+    shareLinkButton.style.backgroundColor="gray";
+
+    
+    }
+    
+    // Function to handle the "Edit" button click
+    function handleEdit() {
+        resume.style.display = 'none';
+        form.style.display = 'block';
+        printButton.style.display = 'none';
+        editButton.style.display = 'none';
+        downloadButton.style.display = 'none';
+        shareButton.style.display = 'none';
+    }
+    
+    // Event listener for form submission
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        
+        // Get the form data
+        const formData = new FormData(form);
+        formData.forEach((value, key) => {
+            if (key === 'skills') {
+                resumeData[key] = value.toString().split(',').filter(skill => skill.trim() !== '');
+            } else {
+                resumeData[key] = value.toString();
+            }
+        });
+        const username = usernameElement.value;
+    const uniquePath = `resume/${username.replace(/\s+/g, '_')}_resume.html`;
+        
+        generateResume();
+    });
+    
+    
+    // Event listener for print button
+    printButton?.addEventListener('click', () => {
+        // Ensure resume is visible before printing
+        resume.style.display = 'block';
+        form.style.display = 'none';
+        printButton.style.display = 'none';
+        editButton.style.display = 'none';
+        downloadButton.style.display = 'none';
+        shareButton.style.display = 'none';
+        
+    
+        // Delay to ensure content is rendered
+        setTimeout(() => {
+            window.print();
+            
+            // Reset display properties after printing
+            resume.style.display = 'block';
+            form.style.display = 'none';
+            printButton.style.display = 'block';
+            editButton.style.display = 'block';
+            downloadButton.style.display = 'block';
+            shareButton.style.display = 'block';
+            
+        }, 500);
+    });
+    
+    
+    // // Event listener for edit button
+    editButton?.addEventListener('click', handleEdit);
+
+    
+    
+    
+    
+    // Print-specific CSS class to hide certain elements
+    const style = document.createElement('style');
+    style.textContent = `
+        @media print {
+            .printing, .printing * {
+                display: none !important;
+            }
+        }
+    `;
+    document.head.appendChild(style);
+    } )
+

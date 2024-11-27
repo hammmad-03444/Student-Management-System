@@ -1,0 +1,20 @@
+{
+  "name": "student-management-system",
+  "version": "1.0.0",
+  "description": "this is the commpelete student management system which shows all your information as a student",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "MHK",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/inquirer": "^9.0.7",
+    "@types/node": "^20.14.8"
+  },
+  "dependencies": {
+    "inquirer": "^9.2.23"
+  }
+}
